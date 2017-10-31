@@ -14,6 +14,13 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
+
+#include <linux/tcp.h>
+#include <linux/types.h>
+#include <asm/byteorder.h>
+#include <linux/ip.h>
+
+
 #include <net/if.h>
 #include <string.h>
 #include <stdio.h>

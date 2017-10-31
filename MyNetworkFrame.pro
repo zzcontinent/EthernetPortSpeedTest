@@ -16,7 +16,9 @@ HEADERS += \
     MyHeader.h \
     Sampling.h \
     ProtoType.h \
-    TCP_UDP.h
+    TCP_UDP.h \
+    memregisters.h \
+    memutils.h
 
 LIBS +=-lpthread
 
