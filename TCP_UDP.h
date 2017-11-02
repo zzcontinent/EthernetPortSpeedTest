@@ -16,18 +16,19 @@ public:
         CloseUDPSocket();
         CloseTCPSocket();
 	}
-    void SendUDP(const char* pAddr,USHORT port,const BYTE* pBuf,int len)
+    int SendUDP(const char* pAddr,USHORT port,const BYTE* pBuf,int len)
     {
        sockaddr_in address;//处理网络通信的地址
        address.sin_family=AF_INET;
        address.sin_addr.s_addr=inet_addr(pAddr);//这里不一样
        address.sin_port=htons(port);
-       sendto(m_UDPSocketServerClient,pBuf,len,0,(struct sockaddr *)&address,sizeof(sockaddr_in));
+       return sendto(m_UDPSocketServerClient,pBuf,len,0,(struct sockaddr *)&address,sizeof(sockaddr_in));
     }
     //接收数据、返回接收数据长度
     int RecvUDP(BYTE* pBuf)
     {
-        int ret = recvfrom(m_UDPSocketServerClient, pBuf, 2048, 0, NULL, NULL);
+        int addr_len = sizeof(sockaddr_in);
+        int ret = recvfrom(m_UDPSocketServerClient, pBuf, 2048, 0, (struct sockaddr*)&m_UDPServerRecvFromAddress, (socklen_t*)&addr_len);
         if(-1 == ret)
         {
             //cout<<"..."<<endl;
@@ -108,7 +109,7 @@ public:
     int AcceptTCP(void)
     {
        //用来监听的端口sock_descriptor
-       socklen_t address_size = sizeof(sockaddr);//处理网络通信的地址
+       socklen_t address_size = sizeof(sockaddr_in);//处理网络通信的地址
        m_ConnectTCPSocketServerClient = accept(m_TCPSocketServerClient,(struct sockaddr *)&m_TCPServerAcceptAddress, &address_size);
        if(m_ConnectTCPSocketServerClient== -1)
        {
@@ -145,12 +146,15 @@ public:
         return 1;
     }
 
-    void SendTCP(const BYTE* pBuf,int len)
+    int SendTCP(const BYTE* pBuf,int len)
     {
-       if(-1 == send(m_TCPSocketServerClient,pBuf,len,0))
+       int ret;
+       ret = send(m_TCPSocketServerClient,pBuf,len,0);
+       if(-1 == ret)
        {
            cout<<"*";
        }
+       return ret;
     }
 
     bool CheckTcpConnection()
@@ -162,6 +166,19 @@ public:
     bool GetIsTcpConnected()
     {
         return m_IsTcpClientConnected;
+    }
+
+
+    void GetClientAddressPort_TCP(char* pAddr,ushort* port)
+    {
+        strcpy(pAddr,inet_ntoa(m_TCPServerAcceptAddress.sin_addr));
+        *port = ntohs(m_TCPServerAcceptAddress.sin_port);
+    }
+
+    void GetClientAddressPort_UDP(char* pAddr,ushort* port)
+    {
+        strcpy(pAddr,inet_ntoa(m_UDPServerRecvFromAddress.sin_addr));
+        *port = ntohs(m_UDPServerRecvFromAddress.sin_port);
     }
 
 private:
@@ -227,5 +244,6 @@ private:
     int m_TCPSocketServerClient;
     int m_ConnectTCPSocketServerClient;
     sockaddr_in m_TCPServerAcceptAddress;//处理网络通信的地址
+    sockaddr_in m_UDPServerRecvFromAddress;//处理网络通信的地址
 };
 

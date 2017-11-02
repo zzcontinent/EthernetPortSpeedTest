@@ -15,7 +15,7 @@
 #include <sys/time.h>
 
 
-#include <linux/tcp.h>
+#include <netinet/tcp.h>
 #include <linux/types.h>
 #include <asm/byteorder.h>
 #include <linux/ip.h>
